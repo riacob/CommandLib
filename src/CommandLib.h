@@ -17,7 +17,7 @@ class CommandLib
 {
 private:
     // Default: "AT", example: AT
-    char *commandPrefix = "AT";
+    const char *commandPrefix = "AT";
     // Default: 3, size includes null-terminator
     size_t commandPrefixSize = 3;
     // Default: '+', example: AT+VERSION?
@@ -30,6 +30,13 @@ private:
     char subcommandRead = '?';
     // Default: '\0', example: AT+OFF
     char subcommandRun = '\0';
+    void malloc_assert(void *ptr)
+    {
+        if (ptr == NULL)
+        {
+            w->debugln("[FATAL] Memory allocation failed");
+        }
+    }
 
 public:
     /**
@@ -138,14 +145,21 @@ public:
         // Currently commandSize is an index, we need to convert it to size if the index (aka size) is greater than zero (also considers null-terminator)
         if (newCommand.commandSize > 0)
         {
+            // TODO fix size shenanigans
             newCommand.commandSize++;
+            /*newCommand.commandSize++;
+            newCommand.commandSize++;
+            newCommand.commandSize++;
+            newCommand.commandSize++;*/
         }
         // Allocate enough memory to store the command then store it in Command :facepalm:
         newCommand.command = new char[newCommand.commandSize];
+        malloc_assert(newCommand.command);
         memmove(newCommand.command, command, newCommand.commandSize * sizeof(char));
         // Move the old command array into the new command array
         // Also remembering that Command is not a single byte in size :secondfacepalm:
         Command *newCommands = new Command[commandsCount];
+        malloc_assert(newCommands);
         memmove(newCommands, commands, (commandsCount - 1) * sizeof(Command));
         // Add the new command to the array
         newCommands[commandsCount - 1] = newCommand;
@@ -163,24 +177,51 @@ public:
         // Iterate through all commands to find the desired one
         for (size_t i = 0; i < commandsCount; i++)
         {
-            // If command type does not accept parameters return
-            if (commands[i].type != CommandType::WRITE)
-            {
-                w->debug("[ERROR] Command ");
-                w->debug(command);
-                w->debugln(" is not of CommandType::WRITE and cannot accept parameters");
-                // return;
-            }
             // strcmp returns 0 if strings match
             if ((strcmp(commands[i].command, command)) == 0)
             {
+                // If command type does not accept parameters return
+                if (commands[i].type != CommandType::WRITE)
+                {
+                    w->debug("[ERROR] Command ");
+                    w->debug(command);
+                    w->debugln(" is not of CommandType::WRITE and cannot accept parameters");
+                    return;
+                }
+                else
+                {
+                    w->debug("[INFO] Command parameter ");
+                    w->debug(parameterName);
+                    w->debug(":");
+                    switch (parameterType)
+                    {
+                    case CommandParameterType::INTEGER:
+                    {
+                        w->debug("INTEGER");
+                        break;
+                    }
+                    case CommandParameterType::STRING:
+                    {
+                        w->debug("STRING");
+                        break;
+                    }
+                    case CommandParameterType::FLOAT:
+                    {
+                        w->debug("FLOAT");
+                        break;
+                    }
+                    }
+                    w->debug(" added successfully to command ");
+                    w->debugln(command);
+                }
+                // TODO check if parameter already exists
                 // add command parameters
                 commands[i].parametersCount++;
-                //Serial.println((int)commands[i].parametersCount);
                 // Insert new parameter to the right of the array
                 CommandParameter *newParameters = new CommandParameter[commands[i].parametersCount];
+                malloc_assert(newParameters);
                 memmove(newParameters, commands[i].parameters, (commands[i].parametersCount - 1) * sizeof(CommandParameter));
-                Serial.println("AAAAA");
+                // if serial print sizeof commands[i].command bug sometimes disappears
                 // Find the size of parameterName
                 while (parameterName[newParameters[commands[i].parametersCount - 1].nameSize] != '\0')
                 {
@@ -190,16 +231,19 @@ public:
                 if (newParameters[commands[i].parametersCount - 1].nameSize > 0)
                 {
                     newParameters[commands[i].parametersCount - 1].nameSize++;
+                    // newParameters[commands[i].parametersCount - 1].nameSize++;
                 }
                 // This garbled mess to move parameterName to newParameters[currentparameter].name
                 newParameters[commands[i].parametersCount - 1].name = new char[newParameters[commands[i].parametersCount - 1].nameSize];
+                malloc_assert(newParameters[commands[i].parametersCount - 1].name);
                 memmove(newParameters[commands[i].parametersCount - 1].name, parameterName, (newParameters[commands[i].parametersCount - 1].nameSize) * sizeof(char));
                 // Save the parameter type; we will need it for casting during the parsing
                 switch (parameterType)
                 {
                 case CommandParameterType::INTEGER:
                 {
-                    newParameters[commands[i].parametersCount - 1].type = CommandParameterType::INTEGER;;
+                    newParameters[commands[i].parametersCount - 1].type = CommandParameterType::INTEGER;
+                    ;
                     break;
                 }
                 case CommandParameterType::STRING:
@@ -213,7 +257,8 @@ public:
                     break;
                 }
                 }
-                delete[] commands[i].parameters;
+                // compiler should automatically delete?? very weird bug
+                // delete[] commands[i].parameters;
                 commands[i].parameters = newParameters;
                 return;
             }
@@ -233,9 +278,6 @@ public:
             {
                 w->debug("[INFO] Debugging of command ");
                 w->debug(command);
-                /*w->debug(" (");
-                Serial.print((int)sizeof(commands[i]));
-                w->debug(" bytes)");*/
                 w->debug(" -> ");
                 w->debug(commandPrefix);
                 w->debug(separatorPrefix);

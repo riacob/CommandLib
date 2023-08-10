@@ -17,13 +17,15 @@ CommandLib commandLib(new ArduinoWrapper());
 void setup()
 {
     Serial.begin(9600);
+    
     commandLib.registerCommand(CommandLib::CommandType::READ, "INFO");
     commandLib.registerCommand(CommandLib::CommandType::WRITE, "TESTS");
     commandLib.registerCommand(CommandLib::CommandType::RUN, "SENSORS");
 
     commandLib.addParameter("TESTS","P1",CommandLib::CommandParameterType::STRING);
     commandLib.addParameter("TESTS","P2",CommandLib::CommandParameterType::INTEGER);
-    commandLib.addParameter("TESTS","P3",CommandLib::CommandParameterType::FLOAT);
+    commandLib.addParameter("TESTS","P367",CommandLib::CommandParameterType::FLOAT);
+    commandLib.addParameter("TESTS","P4432",CommandLib::CommandParameterType::STRING);
 
     commandLib.debugCommand("INFO");
     commandLib.debugCommand("TESTS");
