@@ -80,10 +80,22 @@ public:
     class Command
     {
     public:
+        // Write callback
+        void (*wcallback)(CommandParameter *params, size_t paramsCount);
+        bool wcallbackSet = false;
+        // Read callback
+        void (*rdcallback)();
+        bool rdcallbackSet = false;
+        // Run callback
+        void (*runcallback)();
+        bool runcallbackSet = false;
         // Type of the command
         CommandType type;
+        // Command text
         char *command;
+        // Command text size
         size_t commandSize = 0;
+        // Command parameters
         CommandParameter *parameters;
         size_t parametersCount = 0;
     };
@@ -145,12 +157,7 @@ public:
         // Currently commandSize is an index, we need to convert it to size if the index (aka size) is greater than zero (also considers null-terminator)
         if (newCommand.commandSize > 0)
         {
-            // TODO fix size shenanigans
             newCommand.commandSize++;
-            /*newCommand.commandSize++;
-            newCommand.commandSize++;
-            newCommand.commandSize++;
-            newCommand.commandSize++;*/
         }
         // Allocate enough memory to store the command then store it in Command :facepalm:
         newCommand.command = new char[newCommand.commandSize];
@@ -339,6 +346,64 @@ public:
                 w->debug('\n');
                 return;
             }
+        }
+    }
+    void setWriteCallback(const char *command, void (*callback)(CommandParameter *params, size_t paramsCount))
+    {
+        // Iterate through all commands to find the desired one
+        for (size_t i = 0; i < commandsCount; i++)
+        {
+            // TODO make sure type is WRITE
+            // strcmp returns 0 if strings match
+            if ((strcmp(commands[i].command, command)) == 0)
+            {
+                commands[i].wcallback = callback;
+                commands[i].wcallbackSet = true;
+            }
+        }
+    }
+    void setReadCallback(const char *command, void(callback)())
+    {
+        // Iterate through all commands to find the desired one
+        for (size_t i = 0; i < commandsCount; i++)
+        {
+            // TODO make sure type is READ
+            // strcmp returns 0 if strings match
+            if ((strcmp(commands[i].command, command)) == 0)
+            {
+                commands[i].rdcallback = callback;
+                commands[i].rdcallbackSet = true;
+            }
+        }
+    }
+    void setRunCallback(const char *command, void(callback)())
+    {
+        // Iterate through all commands to find the desired one
+        for (size_t i = 0; i < commandsCount; i++)
+        {
+            // TODO make sure type is RUN
+            // strcmp returns 0 if strings match
+            if ((strcmp(commands[i].command, command)) == 0)
+            {
+                commands[i].runcallback = callback;
+                commands[i].runcallbackSet = true;
+            }
+        }
+    }
+    /**
+     * @brief Handles and parses commands. Should be run in main loop.
+     *
+     */
+    void handleCommands()
+    {
+        // Read the incoming serial data
+        static char cmdbuf[128] = {0};
+        static size_t cmdsize = 0;
+        cmdsize = w->readBytesUntil(cmdbuf, '\n');
+        // Respond with OK
+        if (cmdsize)
+        {
+            w->writeBytes("OK", 3, "\n");
         }
     }
 };

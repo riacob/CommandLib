@@ -24,25 +24,43 @@ public:
     {
         if (Serial.available() < bytesCount)
         {
-            debug("Not enough bytes available");
+            return;
         }
+        Serial.readBytes(readBuffer, bytesCount);
     }
-    void readBytesUntil(char *readBuffer, char terminator) override {}
-    void writeBytes(char *writeBuffer, size_t bytesCount) override
+    size_t readBytesUntil(char *readBuffer, char terminator) override
     {
+        if (Serial.available() <= 0)
+        {
+            return 0;
+        }
+        return Serial.readBytesUntil(terminator, readBuffer, UINT32_MAX);
+    }
+    void writeBytes(char *writeBuffer, size_t bytesCount, const char *terminators = "") override
+    {
+        for (size_t i = 0; i < bytesCount; i++) {
+            Serial.write(writeBuffer[i]);
+        }
+        size_t idx = 0;
+        while (terminators[idx] != '\0') {
+            Serial.write(terminators[idx]);
+            idx++;
+        }
     }
     void debug(const char *s) override
     {
         Serial.print(s);
     }
-        void debugln(const char *s) override
+    void debugln(const char *s) override
     {
         Serial.println(s);
     }
-    void debug( char c) override{
+    void debug(char c) override
+    {
         Serial.print(c);
     }
-    void debugln( char c) override{
+    void debugln(char c) override
+    {
         Serial.println(c);
     }
 };

@@ -16,8 +16,8 @@ class PlatformWrapper
 public:
     PlatformWrapper() {}
     virtual void readBytes(char *readBuffer, size_t bytesCount) {}
-    virtual void readBytesUntil(char *readBuffer, char terminator) {}
-    virtual void writeBytes(char *writeBuffer, size_t bytesCount) {}
+    virtual size_t readBytesUntil(char *readBuffer, char terminator) {}
+    virtual void writeBytes(char *writeBuffer, size_t bytesCount, const char *terminators = "") {}
     virtual void debug(const char *s) {}
     virtual void debug( char c) {}
     virtual void debugln(const char *s) {}
