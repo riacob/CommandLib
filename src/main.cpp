@@ -21,7 +21,7 @@ void setup()
     commandLib.registerCommand(CommandLib::CommandType::WRITE, "TESTS");
     commandLib.registerCommand(CommandLib::CommandType::RUN, "SENSORS");
 
-    commandLib.addParameter("TESTS","P1",CommandLib::CommandParameterType::STRING,(void*)"Hello");
+    commandLib.addParameter("TESTS","P1",CommandLib::CommandParameterType::STRING/*,(void*)"Hello"*/);
 
     commandLib.debugCommand("INFO");
     commandLib.debugCommand("TESTS");

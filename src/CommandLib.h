@@ -158,7 +158,7 @@ public:
         w->debug((char)commandsCount - 1 + 48);
         w->debugln("]");
     }
-    void addParameter(const char *command, const char *parameterName, CommandParameterType parameterType, void *parameterValue)
+    void addParameter(const char *command, const char *parameterName, CommandParameterType parameterType/*, void *parameterValue*/)
     {
         // Iterate through all commands to find the desired one
         for (size_t i = 0; i < commandsCount; i++)
@@ -200,7 +200,7 @@ public:
                 case CommandParameterType::INTEGER:
                 {
                     newParameters[commands[i].parametersCount - 1].type = CommandParameterType::INTEGER;
-                    newParameters[commands[i].parametersCount - 1].parameter = parameterValue;
+                    //newParameters[commands[i].parametersCount - 1].parameter = parameterValue;
                     break;
                 }
                 case CommandParameterType::STRING:
@@ -208,7 +208,7 @@ public:
                     newParameters[commands[i].parametersCount - 1].type = CommandParameterType::STRING;
                     // If the parameter is a string, we also need to store the size of the string
                     // Find the size of parameterValue
-                    char *pValueChar = (char *)parameterValue;
+                    /*char *pValueChar = (char *)parameterValue;
                     while (pValueChar[commands[i].parameters->stringSize] != '\0')
                     {
                         commands[i].parameters->stringSize++;
@@ -220,13 +220,13 @@ public:
                     }
                     // This garbled mess again to move parameterValue to newParameters[currentparameter].parameter
                     newParameters[commands[i].parametersCount - 1].parameter = new char[newParameters[commands[i].parametersCount - 1].stringSize];
-                    memmove(newParameters[commands[i].parametersCount - 1].parameter, parameterValue, newParameters[commands[i].parametersCount - 1].stringSize*sizeof(char));
+                    memmove(newParameters[commands[i].parametersCount - 1].parameter, parameterValue, newParameters[commands[i].parametersCount - 1].stringSize*sizeof(char));*/
                     break;
                 }
                 case CommandParameterType::FLOAT:
                 {
                     newParameters[commands[i].parametersCount - 1].type = CommandParameterType::FLOAT;
-                    newParameters[commands[i].parametersCount - 1].parameter = parameterValue;
+                    //newParameters[commands[i].parametersCount - 1].parameter = parameterValue;
                     break;
                 }
                 }
