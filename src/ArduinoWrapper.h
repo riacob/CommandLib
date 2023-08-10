@@ -39,10 +39,10 @@ public:
     {
         Serial.println(s);
     }
-    void debug( char c) {
+    void debug( char c) override{
         Serial.print(c);
     }
-    void debugln( char c) {
+    void debugln( char c) override{
         Serial.println(c);
     }
 };

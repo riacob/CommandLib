@@ -61,7 +61,7 @@ public:
     public:
         CommandParameterType type;
         char *name;
-        size_t nameSize;
+        size_t nameSize = 0;
         void *parameter;
         // only used if parametertype is string
         size_t stringSize = 0;
@@ -158,7 +158,7 @@ public:
         w->debug((char)commandsCount - 1 + 48);
         w->debugln("]");
     }
-    void addParameter(const char *command, const char *parameterName, CommandParameterType parameterType/*, void *parameterValue*/)
+    void addParameter(const char *command, const char *parameterName, CommandParameterType parameterType)
     {
         // Iterate through all commands to find the desired one
         for (size_t i = 0; i < commandsCount; i++)
@@ -169,18 +169,18 @@ public:
                 w->debug("[ERROR] Command ");
                 w->debug(command);
                 w->debugln(" is not of CommandType::WRITE and cannot accept parameters");
-                //return;
+                // return;
             }
-            Serial.println("a");
             // strcmp returns 0 if strings match
             if ((strcmp(commands[i].command, command)) == 0)
             {
-                Serial.println("b");
                 // add command parameters
                 commands[i].parametersCount++;
+                //Serial.println((int)commands[i].parametersCount);
                 // Insert new parameter to the right of the array
                 CommandParameter *newParameters = new CommandParameter[commands[i].parametersCount];
                 memmove(newParameters, commands[i].parameters, (commands[i].parametersCount - 1) * sizeof(CommandParameter));
+                Serial.println("AAAAA");
                 // Find the size of parameterName
                 while (parameterName[newParameters[commands[i].parametersCount - 1].nameSize] != '\0')
                 {
@@ -199,34 +199,17 @@ public:
                 {
                 case CommandParameterType::INTEGER:
                 {
-                    newParameters[commands[i].parametersCount - 1].type = CommandParameterType::INTEGER;
-                    //newParameters[commands[i].parametersCount - 1].parameter = parameterValue;
+                    newParameters[commands[i].parametersCount - 1].type = CommandParameterType::INTEGER;;
                     break;
                 }
                 case CommandParameterType::STRING:
                 {
                     newParameters[commands[i].parametersCount - 1].type = CommandParameterType::STRING;
-                    // If the parameter is a string, we also need to store the size of the string
-                    // Find the size of parameterValue
-                    /*char *pValueChar = (char *)parameterValue;
-                    while (pValueChar[commands[i].parameters->stringSize] != '\0')
-                    {
-                        commands[i].parameters->stringSize++;
-                    }
-                    // Currently commandSize is an index, we need to convert it to size if the index (aka size) is greater than zero (also considers null-terminator)
-                    if (commands[i].parameters->stringSize > 0)
-                    {
-                        commands[i].parameters->stringSize++;
-                    }
-                    // This garbled mess again to move parameterValue to newParameters[currentparameter].parameter
-                    newParameters[commands[i].parametersCount - 1].parameter = new char[newParameters[commands[i].parametersCount - 1].stringSize];
-                    memmove(newParameters[commands[i].parametersCount - 1].parameter, parameterValue, newParameters[commands[i].parametersCount - 1].stringSize*sizeof(char));*/
                     break;
                 }
                 case CommandParameterType::FLOAT:
                 {
                     newParameters[commands[i].parametersCount - 1].type = CommandParameterType::FLOAT;
-                    //newParameters[commands[i].parametersCount - 1].parameter = parameterValue;
                     break;
                 }
                 }
@@ -250,6 +233,9 @@ public:
             {
                 w->debug("[INFO] Debugging of command ");
                 w->debug(command);
+                /*w->debug(" (");
+                Serial.print((int)sizeof(commands[i]));
+                w->debug(" bytes)");*/
                 w->debug(" -> ");
                 w->debug(commandPrefix);
                 w->debug(separatorPrefix);
@@ -271,7 +257,7 @@ public:
                     }
                     for (size_t j = 0; j < commands[i].parametersCount; j++)
                     {
-                        // print "<parameter_name>"
+                        // print "<parameter_name:parameter_type>"
                         w->debug("<");
                         w->debug(commands[i].parameters[j].name);
                         w->debug(":");
